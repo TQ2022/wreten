@@ -64,8 +64,8 @@ __global__ void SetupBoundaryConditions(double *rhoBC, bool *IsSolid, double *F,
     int Nz = lbmaux[0].Nz;
     int ix, iy, iz, idx;
 
-   // size_t iv = idx * lbmaux[0].Nneigh;
-   // double *f = &F[iv];
+   size_t iv ;
+    double *f ;
     switch (bcType)
     {
     case BCT_XMIN0:
@@ -78,8 +78,8 @@ __global__ void SetupBoundaryConditions(double *rhoBC, bool *IsSolid, double *F,
             return;
         if (IsSolid[idx])
             return;
-        size_t iv = idx * lbmaux[0].Nneigh;
-        double *f = &F[iv];
+         iv = idx * lbmaux[0].Nneigh;
+        f = &F[iv];
         f[1] = 1.0 / 3.0 * (-2 * f[0] - 4 * f[10] - 4 * f[12] - 4 * f[14] - f[2] - 2 * f[3] - 2 * f[4] - 2 * f[5] - 2 * f[6] - 4 * f[8] + 2 * rhoBC[0]);
         f[7] = 1.0 / 24.0 * (-2 * f[0] - 4 * f[10] - 4 * f[12] - 4 * f[14] - 4 * f[2] + f[3] - 5 * f[4] + f[5] - 5 * f[6] + 20 * f[8] + 2 * rhoBC[0]);
         f[9] = 1.0 / 24.0 * (-2 * f[0] + 20 * f[10] - 4 * f[12] - 4 * f[14] - 4 * f[2] + f[3] - 5 * f[4] - 5 * f[5] + f[6] - 4 * f[8] + 2 * rhoBC[0]);
@@ -105,8 +105,8 @@ __global__ void SetupBoundaryConditions(double *rhoBC, bool *IsSolid, double *F,
             return;
         if (IsSolid[idx])
             return;
-        size_t iv = idx * lbmaux[1].Nneigh;
-        double *f = &F[iv];
+        iv = idx * lbmaux[1].Nneigh;
+        f = &F[iv];
         f[1] = 1.0 / 3.0 * (-2 * f[0] - 4 * f[10] - 4 * f[12] - 4 * f[14] - f[2] - 2 * f[3] - 2 * f[4] - 2 * f[5] - 2 * f[6] - 4 * f[8] + 2 * rhoBC[1]);
         f[7] = 1.0 / 24.0 * (-2 * f[0] - 4 * f[10] - 4 * f[12] - 4 * f[14] - 4 * f[2] + f[3] - 5 * f[4] + f[5] - 5 * f[6] + 20 * f[8] + 2 * rhoBC[1]);
         f[9] = 1.0 / 24.0 * (-2 * f[0] + 20 * f[10] - 4 * f[12] - 4 * f[14] - 4 * f[2] + f[3] - 5 * f[4] - 5 * f[5] + f[6] - 4 * f[8] + 2 * rhoBC[1]);
@@ -132,8 +132,8 @@ __global__ void SetupBoundaryConditions(double *rhoBC, bool *IsSolid, double *F,
         idx = ix + iy * Nx + iz * Nx * Ny;
         if (IsSolid[idx])
             return;
-        size_t iv = idx * lbmaux[0].Nneigh;
-        double *f = &F[iv];
+        iv = idx * lbmaux[0].Nneigh;
+        f = &F[iv];
         f[2] = 1 / 3.0 * (-2 * f[0] - f[1] - 2 * (2 * f[11] + 2 * f[13] + f[3] + f[4] + f[5] + f[6] + 2 * f[7] + 2 * f[9] - rhoBC[0]));
         f[8] = 1 / 24.0 * (-2 * f[0] - 4 * f[1] - 4 * f[11] - 4 * f[13] - 5 * f[3] + f[4] - 5 * f[5] + f[6] + 20 * f[7] - 4 * f[9] + 2 * rhoBC[0]);
         f[10] = 1 / 24.0 * (-2 * f[0] - 4 * f[1] - 4 * f[11] - 4 * f[13] - 5 * f[3] + f[4] + f[5] - 5 * f[6] - 4 * f[7] + 20 * f[9] + 2 * rhoBC[0]);
@@ -159,8 +159,8 @@ __global__ void SetupBoundaryConditions(double *rhoBC, bool *IsSolid, double *F,
         idx = ix + iy * Nx + iz * Nx * Ny;
         if (IsSolid[idx])
             return;
-        size_t iv = idx * lbmaux[0].Nneigh;
-        double *f = &F[iv];
+        iv = idx * lbmaux[0].Nneigh;
+        f = &F[iv];
         f[2] = 1 / 3.0 * (-2 * f[0] - f[1] - 2 * (2 * f[11] + 2 * f[13] + f[3] + f[4] + f[5] + f[6] + 2 * f[7] + 2 * f[9] - rhoBC[1]));
         f[8] = 1 / 24.0 * (-2 * f[0] - 4 * f[1] - 4 * f[11] - 4 * f[13] - 5 * f[3] + f[4] - 5 * f[5] + f[6] + 20 * f[7] - 4 * f[9] + 2 * rhoBC[1]);
         f[10] = 1 / 24.0 * (-2 * f[0] - 4 * f[1] - 4 * f[11] - 4 * f[13] - 5 * f[3] + f[4] + f[5] - 5 * f[6] - 4 * f[7] + 20 * f[9] + 2 * rhoBC[1]);
@@ -186,8 +186,8 @@ __global__ void SetupBoundaryConditions(double *rhoBC, bool *IsSolid, double *F,
         idx = ix + iy * Nx + iz * Nx * Ny;
         if (IsSolid[idx])
             return;
-        size_t iv = idx * lbmaux[0].Nneigh;
-        double *f = &F[iv];
+       iv = idx * lbmaux[0].Nneigh;
+       f = &F[iv];
 
         f[3] = 1 / 3.0 * (-2 * f[0] - 2 * f[1] - 4 * f[10] - 4 * f[11] - 4 * f[13] - 2 * f[2] - f[4] - 2 * f[5] - 2 * f[6] - 4 * f[8] + 2 * rhoBC[0]);
         f[7] = 1 / 24.0 * (-2 * f[0] + f[1] - 4 * f[10] - 4 * f[11] - 4 * f[13] - 5 * f[2] - 4 * f[4] + f[5] - 5 * f[6] + 20 * f[8] + 2 * rhoBC[0]);
@@ -214,8 +214,8 @@ __global__ void SetupBoundaryConditions(double *rhoBC, bool *IsSolid, double *F,
         idx = ix + iy * Nx + iz * Nx * Ny;
         if (IsSolid[idx])
             return;
-        size_t iv = idx * lbmaux[0].Nneigh;
-        double *f = &F[iv];
+        iv = idx * lbmaux[0].Nneigh;
+        f = &F[iv];
         f[3] = 1 / 3.0 * (-2 * f[0] - 2 * f[1] - 4 * f[10] - 4 * f[11] - 4 * f[13] - 2 * f[2] - f[4] - 2 * f[5] - 2 * f[6] - 4 * f[8] + 2 * rhoBC[1]);
         f[7] = 1 / 24.0 * (-2 * f[0] + f[1] - 4 * f[10] - 4 * f[11] - 4 * f[13] - 5 * f[2] - 4 * f[4] + f[5] - 5 * f[6] + 20 * f[8] + 2 * rhoBC[1]);
         f[9] = 1 / 24.0 * (-2 * f[0] + f[1] + 20 * f[10] - 4 * f[11] - 4 * f[13] - 5 * f[2] - 4 * f[4] - 5 * f[5] + f[6] - 4 * f[8] + 2 * rhoBC[1]);
@@ -241,8 +241,8 @@ __global__ void SetupBoundaryConditions(double *rhoBC, bool *IsSolid, double *F,
         idx = ix + iy * Nx + iz * Nx * Ny;
         if (IsSolid[idx])
             return;
-        size_t iv = idx * lbmaux[0].Nneigh;
-        double *f = &F[iv];
+         iv = idx * lbmaux[0].Nneigh;
+        f = &F[iv];
         f[4] = 1 / 3.0 * (-2 * f[0] - 2 * f[1] - 4 * f[12] - 4 * f[14] - 2 * f[2] - f[3] - 2 * f[5] - 2 * f[6] - 4 * f[7] - 4 * f[9] + 2 * rhoBC[0]);
         f[8] = 1 / 24.0 * (-2 * f[0] - 5 * f[1] - 4 * f[12] - 4 * f[14] + f[2] - 4 * f[3] - 5 * f[5] + f[6] + 20 * f[7] - 4 * f[9] + 2 * rhoBC[0]);
         f[10] = 1 / 24.0 * (-2 * f[0] - 5 * f[1] - 4 * f[12] - 4 * f[14] + f[2] - 4 * f[3] + f[5] - 5 * f[6] - 4 * f[7] + 20 * f[9] + 2 * rhoBC[0]);
@@ -268,8 +268,8 @@ __global__ void SetupBoundaryConditions(double *rhoBC, bool *IsSolid, double *F,
         idx = ix + iy * Nx + iz * Nx * Ny;
         if (IsSolid[idx])
             return;
-        size_t iv = idx * lbmaux[0].Nneigh;
-        double *f = &F[iv];
+     iv = idx * lbmaux[0].Nneigh;
+        f = &F[iv];
         f[4] = 1 / 3.0 * (-2 * f[0] - 2 * f[1] - 4 * f[12] - 4 * f[14] - 2 * f[2] - f[3] - 2 * f[5] - 2 * f[6] - 4 * f[7] - 4 * f[9] + 2 * rhoBC[1]);
         f[8] = 1 / 24.0 * (-2 * f[0] - 5 * f[1] - 4 * f[12] - 4 * f[14] + f[2] - 4 * f[3] - 5 * f[5] + f[6] + 20 * f[7] - 4 * f[9] + 2 * rhoBC[1]);
         f[10] = 1 / 24.0 * (-2 * f[0] - 5 * f[1] - 4 * f[12] - 4 * f[14] + f[2] - 4 * f[3] + f[5] - 5 * f[6] - 4 * f[7] + 20 * f[9] + 2 * rhoBC[1]);
@@ -295,8 +295,8 @@ __global__ void SetupBoundaryConditions(double *rhoBC, bool *IsSolid, double *F,
         idx = ix + iy * Nx + iz * Nx * Ny;
         if (IsSolid[idx])
             return;
-        size_t iv = idx * lbmaux[0].Nneigh;
-        double *f = &F[iv];
+       iv = idx * lbmaux[0].Nneigh;
+       f = &F[iv];
         f[5] = 1 / 3.0 * (-2 * f[0] - 2 * f[1] - 4 * f[12] - 4 * f[13] - 2 * f[2] - 2 * f[3] - 2 * f[4] - f[6] - 4 * f[8] - 4 * f[9] + 2 * rhoBC[0]);
         f[7] = 1 / 24.0 * (-2 * f[0] + f[1] - 4 * f[12] - 4 * f[13] - 5 * f[2] + f[3] - 5 * f[4] - 4 * f[6] + 20 * f[8] - 4 * f[9] + 2 * rhoBC[0]);
         f[10] = 1 / 24.0 * (-2 * f[0] - 5 * f[1] - 4 * f[12] - 4 * f[13] + f[2] - 5 * f[3] + f[4] - 4 * f[6] - 4 * f[8] + 20 * f[9] + 2 * rhoBC[0]);
@@ -322,8 +322,8 @@ __global__ void SetupBoundaryConditions(double *rhoBC, bool *IsSolid, double *F,
         idx = ix + iy * Nx + iz * Nx * Ny;
         if (IsSolid[idx])
             return;
-        size_t iv = idx * lbmaux[0].Nneigh;
-        double *f = &F[iv];
+        iv = idx * lbmaux[0].Nneigh;
+        f = &F[iv];
         f[5] = 1 / 3.0 * (-2 * f[0] - 2 * f[1] - 4 * f[12] - 4 * f[13] - 2 * f[2] - 2 * f[3] - 2 * f[4] - f[6] - 4 * f[8] - 4 * f[9] + 2 * rhoBC[1]);
         f[7] = 1 / 24.0 * (-2 * f[0] + f[1] - 4 * f[12] - 4 * f[13] - 5 * f[2] + f[3] - 5 * f[4] - 4 * f[6] + 20 * f[8] - 4 * f[9] + 2 * rhoBC[1]);
         f[10] = 1 / 24.0 * (-2 * f[0] - 5 * f[1] - 4 * f[12] - 4 * f[13] + f[2] - 5 * f[3] + f[4] - 4 * f[6] - 4 * f[8] + 20 * f[9] + 2 * rhoBC[1]);
@@ -349,8 +349,8 @@ __global__ void SetupBoundaryConditions(double *rhoBC, bool *IsSolid, double *F,
         idx = ix + iy * Nx + iz * Nx * Ny;
         if (IsSolid[idx])
             return;
-        size_t iv = idx * lbmaux[0].Nneigh;
-        double *f = &F[iv];
+      iv = idx * lbmaux[0].Nneigh;
+       f = &F[iv];
         f[6] = 1 / 3.0 * (-2 * f[0] - 2 * f[1] - 4 * f[10] - 4 * f[11] - 4 * f[14] - 2 * f[2] - 2 * f[3] - 2 * f[4] - f[5] - 4 * f[7] + 2 * rhoBC[0]);
         f[8] = 1 / 24.0 * (-2 * f[0] - 5 * f[1] - 4 * f[10] - 4 * f[11] - 4 * f[14] + f[2] - 5 * f[3] + f[4] - 4 * f[5] + 20 * f[7] + 2 * rhoBC[0]);
         f[9] = 1 / 24.0 * (-2 * f[0] + f[1] + 20 * f[10] - 4 * f[11] - 4 * f[14] - 5 * f[2] + f[3] - 5 * f[4] - 4 * f[5] - 4 * f[7] + 2 * rhoBC[0]);
@@ -377,8 +377,8 @@ __global__ void SetupBoundaryConditions(double *rhoBC, bool *IsSolid, double *F,
         idx = ix + iy * Nx + iz * Nx * Ny;
         if (IsSolid[idx])
             return;
-        size_t iv = idx * lbmaux[0].Nneigh;
-        double *f = &F[iv];
+        iv = idx * lbmaux[0].Nneigh;
+        f = &F[iv];
         f[6] = 1 / 3.0 * (-2 * f[0] - 2 * f[1] - 4 * f[10] - 4 * f[11] - 4 * f[14] - 2 * f[2] - 2 * f[3] - 2 * f[4] - f[5] - 4 * f[7] + 2 * rhoBC[1]);
         f[8] = 1 / 24.0 * (-2 * f[0] - 5 * f[1] - 4 * f[10] - 4 * f[11] - 4 * f[14] + f[2] - 5 * f[3] + f[4] - 4 * f[5] + 20 * f[7] + 2 * rhoBC[1]);
         f[9] = 1 / 24.0 * (-2 * f[0] + f[1] + 20 * f[10] - 4 * f[11] - 4 * f[14] - 5 * f[2] + f[3] - 5 * f[4] - 4 * f[5] - 4 * f[7] + 2 * rhoBC[1]);
