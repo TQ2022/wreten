@@ -13,28 +13,28 @@
 struct UserData
 {
 
-    thrust::device_vector<double> Xmin;
-    thrust::device_vector<double> Xmax;
-    thrust::device_vector<double> Ymin;
-    thrust::device_vector<double> Ymax;
-    thrust::device_vector<double> Zmin;
-    thrust::device_vector<double> Zmax;
+    thrust::device_vector<real> Xmin;
+    thrust::device_vector<real> Xmax;
+    thrust::device_vector<real> Ymin;
+    thrust::device_vector<real> Ymax;
+    thrust::device_vector<real> Zmin;
+    thrust::device_vector<real> Zmax;
 
-    double *pXmin;
-    double *pXmax;
-    double *pYmin;
-    double *pYmax;
-    double *pZmin;
-    double *pZmax;
+   real *pXmin;
+    real *pXmax;
+    real *pYmin;
+    real *pYmax;
+    real *pZmin;
+    real *pZmax;
 
-    double ome;
+    real ome;
     size_t block;
-    double Head;
-    double Orig;
-    double Tf;
-    double dtOut;
-    double time;
-    double rho;
+    real Head;
+    real Orig;
+    real Tf;
+    real dtOut;
+    real time;
+    real rho;
     Vec3_t Dp;
     std::ofstream oss_ss;
 };
@@ -53,9 +53,9 @@ enum BoundaryConditionType
     BCT_ZMAX0,
     BCT_ZMAX1
 };
+// real
 
-
-__global__ void SetupBoundaryConditions(double *rhoBC, bool *IsSolid, double *F, double3 *Vel, double *Rho, FLBM::lbm_aux *lbmaux, BoundaryConditionType bcType)
+__global__ void SetupBoundaryConditions(real *rhoBC, bool *IsSolid, real *F, real3 *Vel, real *Rho, FLBM::lbm_aux *lbmaux, BoundaryConditionType bcType)
 {
 
     int ic = threadIdx.x + blockIdx.x * blockDim.x;
@@ -65,7 +65,7 @@ __global__ void SetupBoundaryConditions(double *rhoBC, bool *IsSolid, double *F,
     int ix, iy, iz, idx;
 
    size_t iv ;
-    double *f ;
+    real *f ;
     switch (bcType)
     {
     case BCT_XMIN0:
@@ -100,12 +100,12 @@ __global__ void SetupBoundaryConditions(double *rhoBC, bool *IsSolid, double *F,
         ix = 0;
         iy = ic % Ny;
         iz = ic / Ny;
-        idx = ix + iy * Nx + iz * Nx * Ny;
+        idx = ix + iy * Nx + iz * Nx * Ny + Nx*Ny*Nz;
         if (ic >= Ny * Nz)
             return;
         if (IsSolid[idx])
             return;
-        iv = idx * lbmaux[1].Nneigh;
+        iv = idx * lbmaux[0].Nneigh;
         f = &F[iv];
         f[1] = 1.0 / 3.0 * (-2 * f[0] - 4 * f[10] - 4 * f[12] - 4 * f[14] - f[2] - 2 * f[3] - 2 * f[4] - 2 * f[5] - 2 * f[6] - 4 * f[8] + 2 * rhoBC[1]);
         f[7] = 1.0 / 24.0 * (-2 * f[0] - 4 * f[10] - 4 * f[12] - 4 * f[14] - 4 * f[2] + f[3] - 5 * f[4] + f[5] - 5 * f[6] + 20 * f[8] + 2 * rhoBC[1]);
@@ -156,7 +156,7 @@ __global__ void SetupBoundaryConditions(double *rhoBC, bool *IsSolid, double *F,
         ix = Nx - 1;
         iy = ic % Ny;
         iz = ic / Ny;
-        idx = ix + iy * Nx + iz * Nx * Ny;
+        idx = ix + iy * Nx + iz * Nx * Ny + Nx*Ny*Nz;
         if (IsSolid[idx])
             return;
         iv = idx * lbmaux[0].Nneigh;
@@ -211,7 +211,7 @@ __global__ void SetupBoundaryConditions(double *rhoBC, bool *IsSolid, double *F,
         ix = ic % Nx;
         iy = 0;
         iz = ic / Nx;
-        idx = ix + iy * Nx + iz * Nx * Ny;
+        idx = ix + iy * Nx + iz * Nx * Ny + Nx*Ny*Nz; // this is the idx for fluid 1 and there is no lbmaux[1]
         if (IsSolid[idx])
             return;
         iv = idx * lbmaux[0].Nneigh;
@@ -265,7 +265,7 @@ __global__ void SetupBoundaryConditions(double *rhoBC, bool *IsSolid, double *F,
         ix = ic % Nx;
         iy = Ny - 1;
         iz = ic / Nx;
-        idx = ix + iy * Nx + iz * Nx * Ny;
+        idx = ix + iy * Nx + iz * Nx * Ny+ Nx*Ny*Nz;
         if (IsSolid[idx])
             return;
      iv = idx * lbmaux[0].Nneigh;
@@ -319,7 +319,7 @@ __global__ void SetupBoundaryConditions(double *rhoBC, bool *IsSolid, double *F,
         ix = ic % Nx;
         iy = (ic / Nx) % Ny;
         iz = 0;
-        idx = ix + iy * Nx + iz * Nx * Ny;
+        idx = ix + iy * Nx + iz * Nx * Ny+ Nx*Ny*Nz;
         if (IsSolid[idx])
             return;
         iv = idx * lbmaux[0].Nneigh;
@@ -374,7 +374,7 @@ __global__ void SetupBoundaryConditions(double *rhoBC, bool *IsSolid, double *F,
         ix = ic % Nx;
         iy = (ic / Nx) % Ny;
         iz = Nz - 1;
-        idx = ix + iy * Nx + iz * Nx * Ny;
+        idx = ix + iy * Nx + iz * Nx * Ny+ Nx*Ny*Nz;
         if (IsSolid[idx])
             return;
         iv = idx * lbmaux[0].Nneigh;
@@ -401,23 +401,25 @@ __global__ void SetupBoundaryConditions(double *rhoBC, bool *IsSolid, double *F,
 void Report(FLBM::Domain &dom, void *UD)
 {
     UserData &dat = (*static_cast<UserData *>(UD));
-    double water = 0.0;
-    double oil = 0.0;
-    double Sr = 0.0;
+    real water = 0.0;
+    real oil = 0.0;
+    real Sr = 0.0;
     size_t nw = 0;
     size_t no = 0;
 
     // debug valuve
-    double dewater = 0.0;
-    double deoil = 0.0;
-    double deSr = 0.0;
-    double deSf = 0.0;
-    size_t denw = 0;
-    size_t deno = 0;
-    double dewr = 0.0;
-    double dear = 0.0;
-    size_t denfb = 0;
-    size_t denfo = 0;
+    // double dewater = 0.0;
+    // double deoil = 0.0;
+    // double deSr = 0.0;
+    // double deSf = 0.0;
+    // size_t denw = 0;
+    // size_t deno = 0;
+    // double dewr = 0.0;
+    // double dear = 0.0;
+    // size_t denfb = 0;
+    // size_t denfo = 0;
+
+
 
     // std::ofstream outfile("debug.txt");
 
@@ -428,27 +430,27 @@ void Report(FLBM::Domain &dom, void *UD)
         bool isSolid = dom.IsSolid[0][coord(0)][coord(1)][coord(2)];
         if (!isSolid)
         {
-            double wr = dom.Rho[1][coord(0)][coord(1)][coord(2)];
-            double ar = dom.Rho[0][coord(0)][coord(1)][coord(2)];
+            real wr = dom.Rho[1][coord(0)][coord(1)][coord(2)];
+            real ar = dom.Rho[0][coord(0)][coord(1)][coord(2)];
             if (wr > 0.5 * dat.rho)
             {
                 Sr += 1.0; //  这里已经为0 了
                 water += (wr + ar + dom.Gmix * wr * ar) / 3.0;
                 nw++;
-                dewater = water; // debug
-                deSr = Sr;       // debug
+                // dewater = water; // debug
+                // deSr = Sr;       // debug
             }
             if (ar > 0.5 * dat.rho)
             {
                 oil += (wr + ar + dom.Gmix * wr * ar) / 3.0;
                 no++;
 
-                deoil = oil; // debug
+                // deoil = oil; // debug
             }
         }
     }
 
-    double Sf = 0.0;
+    real Sf = 0.0;
 
     for (size_t x = 0; x < dom.Ndim(0); x++)
     {
@@ -464,8 +466,8 @@ void Report(FLBM::Domain &dom, void *UD)
         }
     }
 
-    double aaa = Sf / dom.Ncells;
-    deSf = Sf; // debug
+    real aaa = Sf / dom.Ncells;
+    //deSf = Sf; // debug
     Sr /= dom.Ncells * (1.0 - aaa);
 
     if (nw > 0)
@@ -474,8 +476,8 @@ void Report(FLBM::Domain &dom, void *UD)
         oil /= no; //  果然是这里计算有问题
 
     // oil = no;
-    double rhow = 0.0;
-    double rhoo = 0.0;
+    real rhow = 0.0;
+    real rhoo = 0.0;
     size_t nfb = 0;
     size_t nfo = 0;
 
@@ -486,14 +488,14 @@ void Report(FLBM::Domain &dom, void *UD)
             // 检查边界的固体状态
             if (!dom.IsSolid[0][1][i][j])
             {
-                double rho = dom.Rho[0][1][i][j]; // 假设第一个索引是流体组分的索引，这里需要根据实际情况调整
+                real rho = dom.Rho[0][1][i][j]; // 假设第一个索引是流体组分的索引，这里需要根据实际情况调整
                 rhow += rho;
                 nfb++;
             }
 
             if (!dom.IsSolid[1][dom.Ndim(0) - 2][i][j])
             {
-                double rho = dom.Rho[1][dom.Ndim(0) - 2][i][j]; // 同上
+                real rho = dom.Rho[1][dom.Ndim(0) - 2][i][j]; // 同上
                 rhoo += rho;
                 nfo++;
             }
@@ -505,10 +507,10 @@ void Report(FLBM::Domain &dom, void *UD)
     if (nfo > 0)
         rhoo /= nfo;
 
-    double Pc;
-    double rho;
+    real Pc;
+    real rho;
 
-    double a = M_PI / dat.ome;
+    real a = M_PI / dat.ome;
     rho = dat.Head * ((1.0 / a) * (dat.time - a * (floor(dat.time / a) + 0.5)) * pow(-1.0, floor(dat.time / a)) + 0.5) + dat.Orig;
     Pc = (2.0 * (rho - dat.rho) + dom.Gmix * (rho * rho * 0.999 * 0.001 - (2.0 * dat.rho - rho) * (2.0 * dat.rho - rho) * 0.999 * 0.001)) / 3.0;
     //  dat.oss_ss << dom.Time << Util::_8s << rho << Util::_8s << rhoo << Util::_8s << rhow << Util::_8s << water << Util::_8s << oil << Util::_8s << Pc << Util::_8s << Sr << "Sf" << Sf<< Util::_8s<< Util::_8s<< "nfb" << nfb<< Util::_8s<< "nfo" << nfb<<Util::_8s <<std::endl;
@@ -538,26 +540,27 @@ void Setup(FLBM::Domain &dom, void *UD)
     {
         dat.time += dat.dtOut;
     }
-    double a = M_PI / dat.ome;
-    double rho = dat.Head * ((1.0 / a) * (dat.time - a * (floor(dat.time / a) + 0.5)) * pow(-1.0, floor(dat.time / a)) + 0.5) + dat.Orig;
-    double rho0min;
-    double rho1min;
-    double rho0max;
-    double rho1max;
+    real a = M_PI / dat.ome;
+    real rho = dat.Head * ((1.0 / a) * (dat.time - a * (floor(dat.time / a) + 0.5)) * pow(-1.0, floor(dat.time / a)) + 0.5) + dat.Orig;
+    real rho0min;
+    real rho1min;
+    real rho0max;
+    real rho1max;
     int sizeX = dom.Ndim(0);
     int sizeY = dom.Ndim(1);
     int sizeZ = dom.Ndim(2);
 
-    dim3 blockDim(256);
-    dim3 gridDimX((sizeX + blockDim.x - 1) / blockDim.x);
-    dim3 gridDimY((sizeY + blockDim.y - 1) / blockDim.y);
-    dim3 gridDimZ((sizeZ + blockDim.z - 1) / blockDim.z);
-    double *pXmin = thrust::raw_pointer_cast(dat.Xmin.data());
-    double *pXmax = thrust::raw_pointer_cast(dat.Xmax.data());
-    double *pYmin = thrust::raw_pointer_cast(dat.Ymin.data());
-    double *pYmax = thrust::raw_pointer_cast(dat.Ymax.data());
-    double *pZmin = thrust::raw_pointer_cast(dat.Zmin.data());
-    double *pZmax = thrust::raw_pointer_cast(dat.Zmax.data());
+    //dim3 blockDim(256);
+    //dim3 gridDimX((sizeX + blockDim.x - 1) / blockDim.x);
+    //dim3 gridDimY((sizeY + blockDim.y - 1) / blockDim.y);
+    //dim3 gridDimZ((sizeZ + blockDim.z - 1) / blockDim.z);
+
+    real *pXmin = thrust::raw_pointer_cast(dat.Xmin.data());
+    real *pXmax = thrust::raw_pointer_cast(dat.Xmax.data());
+    real *pYmin = thrust::raw_pointer_cast(dat.Ymin.data());
+    real *pYmax = thrust::raw_pointer_cast(dat.Ymax.data());
+    real *pZmin = thrust::raw_pointer_cast(dat.Zmin.data());
+    real *pZmax = thrust::raw_pointer_cast(dat.Zmax.data());
 
     if (dat.block < 2)
     {
@@ -570,19 +573,19 @@ void Setup(FLBM::Domain &dom, void *UD)
             rho1max = 0.999 * ((dat.rho - rho) * dat.Dp(0) + dat.rho);
 
             dat.Xmin[0] = rho0min;
-            SetupBoundaryConditions<<<gridDimX, blockDim>>>(pXmin, dom.pIsSolid, dom.pF, dom.pVel, dom.pRho, dom.plbmaux, BCT_XMIN0);
+            SetupBoundaryConditions<<<dom.Ndim(1)*dom.Ndim(2)/dom.Nthread+1, dom.Nthread>>>(pXmin, dom.pIsSolid, dom.pF, dom.pVel, dom.pRho, dom.plbmaux, BCT_XMIN0);
             cudaDeviceSynchronize();
 
             dat.Xmax[0] = rho0max;
-            SetupBoundaryConditions<<<gridDimX, blockDim>>>(pXmax, dom.pIsSolid, dom.pF, dom.pVel, dom.pRho, dom.plbmaux, BCT_XMAX0);
+            SetupBoundaryConditions<<<dom.Ndim(1)*dom.Ndim(2)/dom.Nthread+1, dom.Nthread>>>(pXmax, dom.pIsSolid, dom.pF, dom.pVel, dom.pRho, dom.plbmaux, BCT_XMAX0);
             cudaDeviceSynchronize();
 
             dat.Xmin[1] = rho1min;
-            SetupBoundaryConditions<<<gridDimX, blockDim>>>(pXmin + 1, dom.pIsSolid, dom.pF, dom.pVel, dom.pRho, dom.plbmaux, BCT_XMIN1);
+            SetupBoundaryConditions<<<dom.Ndim(1)*dom.Ndim(2)/dom.Nthread+1, dom.Nthread>>>(pXmin + 1, dom.pIsSolid, dom.pF, dom.pVel, dom.pRho, dom.plbmaux, BCT_XMIN1);
             cudaDeviceSynchronize();
 
             dat.Xmax[1] = rho1max;
-            SetupBoundaryConditions<<<gridDimX, blockDim>>>(pXmax + 1, dom.pIsSolid, dom.pF, dom.pVel, dom.pRho, dom.plbmaux, BCT_XMAX1);
+            SetupBoundaryConditions<<<dom.Ndim(1)*dom.Ndim(2)/dom.Nthread+1, dom.Nthread>>>(pXmax + 1, dom.pIsSolid, dom.pF, dom.pVel, dom.pRho, dom.plbmaux, BCT_XMAX1);
             cudaDeviceSynchronize();
             cudaError_t error = cudaGetLastError();
             if (error != cudaSuccess)
@@ -599,16 +602,16 @@ void Setup(FLBM::Domain &dom, void *UD)
             dat.Ymax[0] = rho0max = 0.001 * ((dat.rho - rho) * dat.Dp(1) + dat.rho);
             dat.Ymax[1] = rho1max = 0.999 * ((dat.rho - rho) * dat.Dp(1) + dat.rho);
 
-            SetupBoundaryConditions<<<gridDimY, blockDim>>>(pYmin, dom.pIsSolid, dom.pF, dom.pVel, dom.pRho, dom.plbmaux, BCT_YMIN0);
+            SetupBoundaryConditions<<<dom.Ndim(0)*dom.Ndim(2)/dom.Nthread+1, dom.Nthread>>>(pYmin, dom.pIsSolid, dom.pF, dom.pVel, dom.pRho, dom.plbmaux, BCT_YMIN0);
             cudaDeviceSynchronize();
 
-            SetupBoundaryConditions<<<gridDimY, blockDim>>>(pYmax, dom.pIsSolid, dom.pF, dom.pVel, dom.pRho, dom.plbmaux, BCT_YMAX0);
+            SetupBoundaryConditions<<<dom.Ndim(0)*dom.Ndim(2)/dom.Nthread+1, dom.Nthread>>>(pYmax, dom.pIsSolid, dom.pF, dom.pVel, dom.pRho, dom.plbmaux, BCT_YMAX0);
             cudaDeviceSynchronize();
 
-            SetupBoundaryConditions<<<gridDimY, blockDim>>>(pYmin + 1, dom.pIsSolid, dom.pF, dom.pVel, dom.pRho, dom.plbmaux, BCT_YMIN1);
+            SetupBoundaryConditions<<<dom.Ndim(0)*dom.Ndim(2)/dom.Nthread+1, dom.Nthread>>>(pYmin + 1, dom.pIsSolid, dom.pF, dom.pVel, dom.pRho, dom.plbmaux, BCT_YMIN1);
             cudaDeviceSynchronize();
 
-            SetupBoundaryConditions<<<gridDimY, blockDim>>>(pYmax + 1, dom.pIsSolid, dom.pF, dom.pVel, dom.pRho, dom.plbmaux, BCT_YMAX1);
+            SetupBoundaryConditions<<<dom.Ndim(0)*dom.Ndim(2)/dom.Nthread+1, dom.Nthread>>>(pYmax + 1, dom.pIsSolid, dom.pF, dom.pVel, dom.pRho, dom.plbmaux, BCT_YMAX1);
             cudaDeviceSynchronize();
             cudaError_t error = cudaGetLastError();
             if (error != cudaSuccess)
@@ -625,16 +628,16 @@ void Setup(FLBM::Domain &dom, void *UD)
             dat.Zmax[0] = rho0max = 0.001 * ((dat.rho - rho) * dat.Dp(2) + dat.rho);
             dat.Zmax[1] = rho1max = 0.999 * ((dat.rho - rho) * dat.Dp(2) + dat.rho);
 
-            SetupBoundaryConditions<<<gridDimZ, blockDim>>>(pZmin, dom.pIsSolid, dom.pF, dom.pVel, dom.pRho, dom.plbmaux, BCT_ZMIN0);
+            SetupBoundaryConditions<<<dom.Ndim(0)*dom.Ndim(1)/dom.Nthread+1, dom.Nthread>>>(pZmin, dom.pIsSolid, dom.pF, dom.pVel, dom.pRho, dom.plbmaux, BCT_ZMIN0);
             cudaDeviceSynchronize();
 
-            SetupBoundaryConditions<<<gridDimZ, blockDim>>>(pZmax, dom.pIsSolid, dom.pF, dom.pVel, dom.pRho, dom.plbmaux, BCT_ZMAX0);
+            SetupBoundaryConditions<<<dom.Ndim(0)*dom.Ndim(1)/dom.Nthread+1, dom.Nthread>>>(pZmax, dom.pIsSolid, dom.pF, dom.pVel, dom.pRho, dom.plbmaux, BCT_ZMAX0);
             cudaDeviceSynchronize();
 
-            SetupBoundaryConditions<<<gridDimZ, blockDim>>>(pZmin + 1, dom.pIsSolid, dom.pF, dom.pVel, dom.pRho, dom.plbmaux, BCT_ZMIN1);
+            SetupBoundaryConditions<<<dom.Ndim(0)*dom.Ndim(1)/dom.Nthread+1, dom.Nthread>>>(pZmin + 1, dom.pIsSolid, dom.pF, dom.pVel, dom.pRho, dom.plbmaux, BCT_ZMIN1);
             cudaDeviceSynchronize();
 
-            SetupBoundaryConditions<<<gridDimZ, blockDim>>>(pZmax + 1, dom.pIsSolid, dom.pF, dom.pVel, dom.pRho, dom.plbmaux, BCT_ZMAX1);
+            SetupBoundaryConditions<<<dom.Ndim(0)*dom.Ndim(1)/dom.Nthread+1, dom.Nthread>>>(pZmax + 1, dom.pIsSolid, dom.pF, dom.pVel, dom.pRho, dom.plbmaux, BCT_ZMAX1);
             cudaDeviceSynchronize();
             cudaError_t error = cudaGetLastError();
             if (error != cudaSuccess)
@@ -664,22 +667,22 @@ try
     String fileLBM;
     bool Render = true;
     size_t N = 200;
-    double Gs0 = -0.53;
-    double Gs1 = -0.53;
-    double Gmix = 2.0;
+    real Gs0 = -0.53;
+    real Gs1 = -0.53;
+    real Gmix = 2.0;
     double nu = 0.05;
     double dt = 1.0;
     double Tf = 10000.0;
-    double dtOut = 50.0;
-    double HeadStep = 1000.0;
-    double rho = 200.0;
-    double ome = 2.0;
-    double Head = 500.0;
-    double Orig = 54.0;
+    real dtOut = 50.0;
+    real HeadStep = 1000.0;
+    real rho = 200.0;
+    real ome = 2.0;
+    real Head = 500.0;
+    real Orig = 54.0;
     size_t oct = 1;
-    double DPx = 1.0;
-    double DPy = 1.0;
-    double DPz = 1.0;
+    real DPx = 1.0;
+    real DPy = 1.0;
+    real DPz = 1.0;
     int outlimit = 1;
     size_t buffer = 1;
     {
@@ -728,7 +731,7 @@ try
         infile >> buffer;
         infile.ignore(200, '\n');
     }
-    Array<double> nua(2);
+    Array<real> nua(2);
     nua[0] = nu;
     nua[1] = nu;
 
@@ -740,7 +743,7 @@ try
     Vec3_t Xmin, Xmax;
     DemDom.BoundingBox(Xmin, Xmax);
     int bound = outlimit;
-    double dx = (Xmax(0) - Xmin(0)) / (N - 2 * bound);
+    real dx = (Xmax(0) - Xmin(0)) / (N - 2 * bound);
     size_t Ny = (Xmax(1) - Xmin(1)) / dx + 2 * bound;
     size_t Nz = (Xmax(2) - Xmin(2)) / dx + 2 * bound;
     DemDom.Center(0.5 * (Xmax - Xmin) + Vec3_t(bound * dx, bound * dx, bound * dx));
@@ -982,6 +985,7 @@ try
     }
 
     // SaveToVTK(Dom, "output_Rho.vtk");
+    //Dom.WriteXDMF("wreten");
 
     String fs;
     fs.Printf("water_retention.res");
