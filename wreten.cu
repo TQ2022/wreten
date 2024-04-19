@@ -988,7 +988,7 @@ try
     dat.oss_ss.open(fs.CStr(), std::ios::out);
     dat.oss_ss << Util::_10_6 << "Time" << Util::_8s << "PDen" << Util::_8s << "Rhow" << Util::_8s << "Rhoo" << Util::_8s << "Water" << Util::_8s << "Oil" << Util::_8s << "Pc" << Util::_8s << "Sr" << std::endl;
     
-    // Dom.Solve(Tf, dtOut, Setup, Report, filekey.CStr(), Render, Nproc);
+     Dom.Solve(Tf, dtOut, Setup, Report, filekey.CStr(), Render, Nproc);
 
     
 
