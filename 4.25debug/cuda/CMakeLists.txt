@@ -65,10 +65,11 @@ foreach(var ${CUDAPROGS})
     )
     
     # Include the directory "/home/tq/mechsys"
-    include_directories(/home/tq/mechsys)
+   # include_directories(/home/tq/mechsys)
     
 
-    
+# Include the directory "~/mechsys"
+include_directories("$ENV{HOME}/mechsys")    
 
     
 endforeach()
