@@ -26,6 +26,7 @@ include(${CMAKE_CURRENT_SOURCE_DIR}/UseMECHSYS.cmake)
 # Set the CUDAPROGS list
 set(CUDAPROGS
    wreten
+   single
 # pureTest
   #tclbm05
  

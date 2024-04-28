@@ -1,4 +1,4 @@
-# Install script for directory: /home/tq/Desktop/4.24debug/cpp/bulid
+# Install script for directory: /home/sergio/wreten/4.25debug/cpp
 
 # Set the install prefix
 if(NOT DEFINED CMAKE_INSTALL_PREFIX)
@@ -50,5 +50,5 @@ endif()
 
 string(REPLACE ";" "\n" CMAKE_INSTALL_MANIFEST_CONTENT
        "${CMAKE_INSTALL_MANIFEST_FILES}")
-file(WRITE "/home/tq/Desktop/4.24debug/cpp/bulid/${CMAKE_INSTALL_MANIFEST}"
+file(WRITE "/home/sergio/wreten/4.25debug/cpp/${CMAKE_INSTALL_MANIFEST}"
      "${CMAKE_INSTALL_MANIFEST_CONTENT}")

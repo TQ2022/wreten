@@ -73,7 +73,6 @@ __global__ void SetupBoundaryConditions(real *rhoBC, bool *IsSolid, real *F, rea
         iy = ic % Ny;
         iz = (ic / Ny) % Nz;
         ib = ix + iy * Nx + iz * Nx * Ny;
-        // size_t ib = ic * lbmaux[0].Nx;
         if (!IsSolid[ib])
         {
             size_t iv = ib * lbmaux[0].Nneigh;
@@ -98,8 +97,8 @@ __global__ void SetupBoundaryConditions(real *rhoBC, bool *IsSolid, real *F, rea
 
     // printf("xmin0  rhoBC[0] = %f, Rho[ib+Ny*Nz] = %f\n", rhoBC[0], Rho[ib+Ny*Nz]);
 
-
             Vel[ib] = (lbmaux[0].Cs / Rho[ib]) * Vel[ib];
+
         }
 
         break;
@@ -167,6 +166,7 @@ __global__ void SetupBoundaryConditions(real *rhoBC, bool *IsSolid, real *F, rea
             // printf("rhoBC[0] = %f, Rho[ib] = %f, f[0] = %f, f[2] = %f, f[8] = %f, f[10] = %f, f[12] = %f, f[14] = %f\n", rhoBC[0], Rho[ib], f[0], f[2], f[8], f[10], f[12], f[14]);
 
             Vel[ib] = (lbmaux[0].Cs / Rho[ib]) * Vel[ib];
+
         }
 
         break;
@@ -498,19 +498,19 @@ void Setup(FLBM::Domain &dom, void *UD)
 
         dat.Xmin[0] = rho0min;
 
-        SetupBoundaryConditions<<<dom.Ndim(1) * dom.Ndim(2) / dom.Nthread + 1, dom.Nthread>>>(pXmin, dom.pIsSolid, dom.pF, dom.pVel, dom.pRho, dom.plbmaux, BCT_XMIN0);
+        SetupBoundaryConditions<<<(dom.Ndim(1) * dom.Ndim(2)) / dom.Nthread + 1, dom.Nthread>>>(pXmin, dom.pIsSolid, dom.pF, dom.pVel, dom.pRho, dom.plbmaux, BCT_XMIN0);
         cudaDeviceSynchronize();
 
         dat.Xmax[0] = rho0max;
-        SetupBoundaryConditions<<<dom.Ndim(1) * dom.Ndim(2) / dom.Nthread + 1, dom.Nthread>>>(pXmax, dom.pIsSolid, dom.pF, dom.pVel, dom.pRho, dom.plbmaux, BCT_XMAX0);
+        SetupBoundaryConditions<<<(dom.Ndim(1) * dom.Ndim(2)) / dom.Nthread + 1, dom.Nthread>>>(pXmax, dom.pIsSolid, dom.pF, dom.pVel, dom.pRho, dom.plbmaux, BCT_XMAX0);
         cudaDeviceSynchronize();
 
         dat.Xmin[1] = rho1min;
-        SetupBoundaryConditions<<<dom.Ndim(1) * dom.Ndim(2) / dom.Nthread + 1, dom.Nthread>>>(pXmin, dom.pIsSolid, dom.pF, dom.pVel, dom.pRho, dom.plbmaux, BCT_XMIN1);
+        SetupBoundaryConditions<<<(dom.Ndim(1) * dom.Ndim(2)) / dom.Nthread + 1, dom.Nthread>>>(pXmin, dom.pIsSolid, dom.pF, dom.pVel, dom.pRho, dom.plbmaux, BCT_XMIN1);
         cudaDeviceSynchronize();
 
         dat.Xmax[1] = rho1max;
-        SetupBoundaryConditions<<<dom.Ndim(1) * dom.Ndim(2) / dom.Nthread + 1, dom.Nthread>>>(pXmax, dom.pIsSolid, dom.pF, dom.pVel, dom.pRho, dom.plbmaux, BCT_XMAX1);
+        SetupBoundaryConditions<<<(dom.Ndim(1) * dom.Ndim(2)) / dom.Nthread + 1, dom.Nthread>>>(pXmax, dom.pIsSolid, dom.pF, dom.pVel, dom.pRho, dom.plbmaux, BCT_XMAX1);
         cudaDeviceSynchronize();
         cudaError_t error = cudaGetLastError();
         if (error != cudaSuccess)
@@ -817,6 +817,7 @@ try
     dat.Zmax.resize(2);
     // The 6 faces (x,y) (x,z) (y,z) of the cube correspond to 2 of each group
 
+
     for (int i = 0; i < N; i++)
     {
         Dom.IsSolid[0][i][0][0] = true;
@@ -870,19 +871,19 @@ try
 
                 {
                     //if ((dat.Dp(0) > 1.0e-12) && (ix < Dom.Ndim(0) / bound)) // 100     //change to 2
-                    if ((dat.Dp(0) > 1.0e-12) && (ix < 2))
+                    if ((dat.Dp(0) > 1.0e-12) && (ix < bound))
                     {
                         Dom.Initialize(il0, idx, 0.999 * rho, OrthoSys::O);
                         Dom.Initialize(il1, idx, 0.001 * rho, OrthoSys::O);
                     }
                    // if ((dat.Dp(1) > 1.0e-12) && (iy < Dom.Ndim(1) / bound)) // 90
-                    if ((dat.Dp(1) > 1.0e-12) && (iy < 2)) // 90
+                    if ((dat.Dp(1) > 1.0e-12) && (iy < bound)) // 90
                     {
                         Dom.Initialize(il0, idx, 0.999 * rho, OrthoSys::O);
                         Dom.Initialize(il1, idx, 0.001 * rho, OrthoSys::O);
                     }
                     //if ((dat.Dp(2) > 1.0e-12) && (iz < Dom.Ndim(2) / bound)) // 93
-                     if ((dat.Dp(2) > 1.0e-12) && (iz < 2)) // 93
+                     if ((dat.Dp(2) > 1.0e-12) && (iz < bound)) // 93
                     {
                         Dom.Initialize(il0, idx, 0.999 * rho, OrthoSys::O);
                         Dom.Initialize(il1, idx, 0.001 * rho, OrthoSys::O);

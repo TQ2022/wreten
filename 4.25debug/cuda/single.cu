@@ -1,0 +1,111 @@
+/************************************************************************
+ * MechSys - Open Library for Mechanical Systems                        *
+ * Copyright (C) 2009 Sergio Galindo                                    *
+ *                                                                      *
+ * This program is free software: you can redistribute it and/or modify *
+ * it under the terms of the GNU General Public License as published by *
+ * the Free Software Foundation, either version 3 of the License, or    *
+ * any later version.                                                   *
+ *                                                                      *
+ * This program is distributed in the hope that it will be useful,      *
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of       *
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the         *
+ * GNU General Public License for more details.                         *
+ *                                                                      *
+ * You should have received a copy of the GNU General Public License    *
+ * along with this program. If not, see <http://www.gnu.org/licenses/>  *
+ ************************************************************************/
+
+// Multicomponent bubble
+
+// Std Lib
+#include <iostream>
+#include <stdlib.h>
+
+// MechSys
+#include <mechsys/flbm/Domain.h>
+
+using std::cout;
+using std::endl;
+
+struct UserData
+{
+    thrust::device_vector<real3> g; 
+    real3 *    pg;
+};
+
+__global__ void ApplyGravity(real3 const * pg, real3 * BForce, real * Rho, FLBM::lbm_aux * lbmaux)
+{
+    size_t ic = threadIdx.x + blockIdx.x * blockDim.x;
+    if (ic>=lbmaux[0].Nl*lbmaux[0].Ncells) return;
+    BForce[ic] = Rho[ic]*pg[0];
+}
+
+void Setup (FLBM::Domain & dom, void * UD)
+{
+    UserData & dat = (*static_cast<UserData *>(UD));
+    ApplyGravity<<<dom.Ncells*dom.Nl/256+1,256>>>(dat.pg,dom.pBForce,dom.pRho,dom.plbmaux);
+    cudaDeviceSynchronize();
+}
+
+int main(int argc, char **argv) try
+{
+    Array<double> nu(2);
+    nu[0] = 1.0/6.0;
+    nu[1] = 1.0/6.0;
+    //nu[1] = 1.0/30.0;
+
+    size_t nx = 100, ny = 100, nz =100;
+    //size_t nx = 100, ny = 100, nz =1;
+
+    // Setting top and bottom wall as solid
+    //FLBM::Domain Dom(D2Q9, nu, iVec3_t(nx,ny,1), 1.0, 1.0);
+    FLBM::Domain Dom(D3Q15, nu, iVec3_t(nx,ny,nz), 1.0, 1.0);
+    UserData dat;
+    Dom.UserData = &dat;
+    dat.g.resize(1);
+    dat.g[0]     = make_real3(0.0,0.0,0.0);
+    dat.pg       = thrust::raw_pointer_cast(dat.g.data());
+    for (size_t i=0;i<nx;i++)
+    {
+        //Dom.IsSolid[0][i][0   ][0] = true;
+        //Dom.IsSolid[0][i][ny-1][0] = true;
+        //Dom.IsSolid[1][i][0   ][0] = true;
+        //Dom.IsSolid[1][i][ny-1][0] = true;
+    }
+
+    // Set inner drop
+    int obsX = nx/2, obsY = ny/2, obsZ = nz/2;
+    int radius =  nx/4.0;
+    double rho = 2.0;
+
+	for (size_t i=0; i<nx; ++i)
+	for (size_t j=0; j<ny; ++j)
+	for (size_t k=0; k<nz; ++k)
+    {
+		Vec3_t V;  V = 0.0, 0.0, 0.0;
+		if (pow((int)(i)-obsX,2.0) + pow((int)(j)-obsY,2.0) + pow((int)(k)-obsZ,2.0) <= pow(radius,2.0)) // circle equation
+		{
+            Dom.Initialize(0,iVec3_t(i,j,k),0.999*rho,V);
+            Dom.Initialize(1,iVec3_t(i,j,k),0.001*rho,V);
+		}
+		else
+		{
+            Dom.Initialize(0,iVec3_t(i,j,k),0.001*rho,V);
+            Dom.Initialize(1,iVec3_t(i,j,k),0.999*rho,V);
+		}
+    }
+
+    // Set parameters
+    Dom.G [0]    =  0.0;
+    Dom.Gs[0]    =  0.48;
+    Dom.G [1]    =  0.0;
+    Dom.Gs[1]    = -0.48;
+    Dom.Gmix     =  1.0;
+
+    Dom.Solve(1.0e5,1.0e3,Setup,NULL,"single",true,1);
+
+
+    return 0;
+}
+MECHSYS_CATCH
