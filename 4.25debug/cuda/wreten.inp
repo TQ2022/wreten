@@ -1,22 +1,22 @@
 ttt_a    fileDEM
 a.h5    fileLBM
 1    Render    
-100    N
-0.0 Gs0
-0.0 Gs1
+200    N
+0.48 Gs0
+-0.48 Gs1
 1.0   Gmix
 0.16666    nu    
 1.0     dt    
-500000   Tf    
-1  dtOut 
+100000 Tf    
+1000  dtOut 
 100   HeadStep
 2.0   rho   
 2.0   ome   
-0.0  Head  
+0.3  Head  
 2.0  Orig
 1      oct
 0.1   Giso or DPx;  
 0.0    G    or Dpy;    
 0.0    th   or DPz;    
 -2    outlimit
-50   buffer
+20   buffer

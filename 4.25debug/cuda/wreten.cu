@@ -73,7 +73,7 @@ __global__ void SetupBoundaryConditions(real *rhoBC, bool *IsSolid, real *F, rea
         iy = ic % Ny;
         iz = (ic / Ny) % Nz;
         ib = ix + iy * Nx + iz * Nx * Ny;
-        if (!IsSolid[ib])
+        //if (!IsSolid[ib])
         {
             size_t iv = ib * lbmaux[0].Nneigh;
             real *f = &F[iv];
@@ -87,7 +87,7 @@ __global__ void SetupBoundaryConditions(real *rhoBC, bool *IsSolid, real *F, rea
             Vel[ib] = make_real3(0.0, 0.0, 0.0);
             for (size_t k = 0; k < lbmaux[0].Nneigh; k++)
             {
-
+                //if ((iz==Nz/2)&&(iy==Ny/2)) printf("F %g %g %d \n",F[iv + k],f[k],k);
                 Rho[ib] += F[iv + k];
                 Vel[ib] = Vel[ib] + F[iv + k] * lbmaux[0].C[k];
             }
@@ -111,7 +111,7 @@ __global__ void SetupBoundaryConditions(real *rhoBC, bool *IsSolid, real *F, rea
         ib = ix + iy * Nx + iz * Nx * Ny + Nx * Ny * Nz;
         // ib = ix * Nz * Ny + iy * Nz + iz + Nx * Ny * Nz;
 
-        if (!IsSolid[ib])
+        //if (!IsSolid[ib])
         {
             size_t iv = ib * lbmaux[0].Nneigh;
             real *f = F + iv;
@@ -145,7 +145,7 @@ __global__ void SetupBoundaryConditions(real *rhoBC, bool *IsSolid, real *F, rea
 
         ib = ix + iy * Nx + iz * Nx * Ny;
 
-        if (!IsSolid[ib])
+        //if (!IsSolid[ib])
         {
             size_t iv = ib * lbmaux[0].Nneigh;
             real *f = F + iv;
@@ -180,7 +180,7 @@ __global__ void SetupBoundaryConditions(real *rhoBC, bool *IsSolid, real *F, rea
 
         ib = ix + iy * Nx + iz * Nx * Ny + Nx * Ny * Nz;
 
-        if (!IsSolid[ib])
+        //if (!IsSolid[ib])
         {
             size_t iv = ib * lbmaux[0].Nneigh;
             real *f = F + iv;
@@ -910,6 +910,7 @@ try
     dat.oss_ss.open(fs.CStr(), std::ios::out);
     dat.oss_ss << Util::_10_6 << "Time" << Util::_8s << "PDen" << Util::_8s << "Rhow" << Util::_8s << "Rhoo" << Util::_8s << "Water" << Util::_8s << "Oil" << Util::_8s << "Pc" << Util::_8s << "Sr" << std::endl;
     Dom.Solve(Tf, dtOut, Setup, Report, filekey.CStr(), Render, Nproc);
+    //Dom.Solve(Tf, dtOut, NULL, Report, filekey.CStr(), Render, Nproc);
     dat.oss_ss.close();
 }
 MECHSYS_CATCH

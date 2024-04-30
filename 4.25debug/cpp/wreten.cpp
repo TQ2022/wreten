@@ -83,7 +83,6 @@ void Setup (LBM::Domain & dom, void * UD)
                 c->F[11]= 1.0/24.0*(-2*c->F[0]-4*c->F[10]+20*c->F[12]-4*c->F[14]-4*c->F[2]-5*c->F[3]+c->F[4]  +c->F[5]-5*c->F[6]-4*c->F[8]+2*c->RhoBC);
                 c->F[13]= 1.0/24.0*(-2*c->F[0]-4*c->F[10]-4 *c->F[12]+20*c->F[14]-4*c->F[2]-5*c->F[3]+  c->F[4]-5*c->F[5]+c->F[6]-4*c->F[8]+2*c->RhoBC);
                 c->Rho = c->VelDen(c->Vel);
-                if (c->Index(1)==dom.Lat[0].Ndim(1)/2&&c->Index(2)==dom.Lat[0].Ndim(2)/2) std::cout << "Rho0 " << c->Rho << std::endl;
 
                 c = dat.xmin1[i];
                 c->RhoBC = rho1min;
@@ -681,19 +680,19 @@ int main(int argc, char **argv) try
             if (oct<2)
             {
                // if ((dat.Dp(0)>1.0e-12)&&(c0->Index(0)<N/bound))
-                if ((dat.Dp(0)>1.0e-12)&&(c0->Index(0)<2))
+                if ((dat.Dp(0)>1.0e-12)&&(c0->Index(0)<buffer))
                 {
                     c0->Initialize(0.999*rho, OrthoSys::O);
                     c1->Initialize(0.001*rho, OrthoSys::O);
                 }
                // if ((dat.Dp(1)>1.0e-12)&&(c0->Index(1)<Ny/bound))
-                if ((dat.Dp(1)>1.0e-12)&&(c0->Index(1)<2))
+                if ((dat.Dp(1)>1.0e-12)&&(c0->Index(1)<buffer))
                 {
                     c0->Initialize(0.999*rho, OrthoSys::O);
                     c1->Initialize(0.001*rho, OrthoSys::O);
                 }
              //  if ((dat.Dp(2)>1.0e-12)&&(c0->Index(2)<Nz/bound))
-                if ((dat.Dp(2)>1.0e-12)&&(c0->Index(2)<2))
+                if ((dat.Dp(2)>1.0e-12)&&(c0->Index(2)<buffer))
                 {
                     c0->Initialize(0.999*rho, OrthoSys::O);
                     c1->Initialize(0.001*rho, OrthoSys::O);
