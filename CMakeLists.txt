@@ -26,7 +26,16 @@ include(${CMAKE_CURRENT_SOURCE_DIR}/UseMECHSYS.cmake)
 # Set the CUDAPROGS list
 set(CUDAPROGS
    wreten
+ # single
+# pureTest
+  #tclbm05
+ 
 )
+
+
+
+
+
 
 # Check if MechSys is found
 if(MECHSYS_FOUND)
@@ -44,8 +53,7 @@ else()
     message("This project requires MechSys")
 endif()
 
-# Define the output directory as "output" in the current directory
-set(OUTPUT_DIRECTORY "${CMAKE_CURRENT_BINARY_DIR}/output")
+
 
 # Iterate over each CUDA program in CUDAPROGS
 foreach(var ${CUDAPROGS})
@@ -63,14 +71,11 @@ foreach(var ${CUDAPROGS})
     )
     
     # Include the directory "/home/tq/mechsys"
-    include_directories(/home/tq/mechsys)
+   # include_directories(/home/tq/mechsys)
     
-    # Create output directory (if it doesn't exist)
-    add_custom_command(TARGET ${var} POST_BUILD
-        COMMAND ${CMAKE_COMMAND} -E make_directory "${OUTPUT_DIRECTORY}"
-        COMMENT "Creating output directory"
-    )
-    
+
+# Include the directory "~/mechsys"
+include_directories("$ENV{HOME}/mechsys")    
 
     
 endforeach()

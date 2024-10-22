@@ -1,4 +1,4 @@
-# Install script for directory: /home/tq/Desktop/github
+# Install script for directory: /home/tq/Desktop/5.6/randonsolid
 
 # Set the install prefix
 if(NOT DEFINED CMAKE_INSTALL_PREFIX)
@@ -50,5 +50,5 @@ endif()
 
 string(REPLACE ";" "\n" CMAKE_INSTALL_MANIFEST_CONTENT
        "${CMAKE_INSTALL_MANIFEST_FILES}")
-file(WRITE "/home/tq/Desktop/github/${CMAKE_INSTALL_MANIFEST}"
+file(WRITE "/home/tq/Desktop/5.6/randonsolid/${CMAKE_INSTALL_MANIFEST}"
      "${CMAKE_INSTALL_MANIFEST_CONTENT}")
